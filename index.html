@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Nuchter" />
+  <meta name="theme-color" content="#07090f" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <title>Nuchter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    @font-face { font-family: 'Instrument Serif'; font-display: swap; }
+    @font-face { font-family: 'Outfit'; font-display: swap; }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #07090f;
+      --s1: #0c0f1a;
+      --s2: #111520;
+      --s3: #181d2c;
+      --border: #1e2438;
+      --accent: #c4b5fd;
+      --accent2: #6ee7b7;
+      --gold: #fcd34d;
+      --danger: #fca5a5;
+      --text: #f1f5ff;
+      --text2: #c8d0e8;
+      --muted: #6b7a99;
+      --font-serif: 'Instrument Serif', Georgia, serif;
+      --font-sans: 'Outfit', system-ui, sans-serif;
+    }
+
+    html { height: 100%; }
+    body {
+      min-height: 100dvh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      overflow-x: hidden;
+      padding-bottom: calc(env(safe-area-inset-bottom) + 40px);
+      color-scheme: dark;
+    }
+
+    /* Subtle grain overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      opacity: 0.4;
+    }
+
+    .glow-a { position: fixed; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, #7c3aed18 0%, transparent 70%); top: -200px; left: -100px; pointer-events: none; z-index: 0; }
+    .glow-b { position: fixed; width: 400px; height: 400px; border-radius: 50%; background: radial-gradient(circle, #06b6d412 0%, transparent 70%); bottom: 0; right: -100px; pointer-events: none; z-index: 0; }
+
+    .app {
+      position: relative; z-index: 1;
+      max-width: 390px; margin: 0 auto;
+      padding: 0 18px 40px;
+    }
+
+    /* HEADER */
+    .header {
+      padding: 60px 0 32px;
+      text-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+    }
+
+    .header-eyebrow {
+      font-family: var(--font-sans);
+      font-size: 10px; font-weight: 500;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .header-title {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: clamp(38px, 11vw, 48px);
+      font-weight: 400;
+      letter-spacing: -0.5px;
+      line-height: 1;
+      color: var(--text);
+    }
+
+    .header-title em { color: var(--accent); font-style: normal; }
+
+    /* TABS */
+    .tabs {
+      display: flex; gap: 2px;
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 14px; padding: 3px;
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      flex: 1; padding: 10px 8px;
+      border: none; border-radius: 11px;
+      font-family: var(--font-sans);
+      font-size: 12px; font-weight: 500;
+      letter-spacing: 0.3px;
+      cursor: pointer; transition: all 0.2s;
+      background: none; color: var(--muted);
+    }
+
+    .tab.active { background: var(--s3); color: var(--text); box-shadow: 0 1px 8px #00000040; }
+
+    .page { display: none; }
+    .page.active { display: flex; flex-direction: column; gap: 12px; }
+
+    /* COUNTER */
+    .counter-block {
+      background: var(--s1);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 40px 24px 36px;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+
+    .counter-block::before {
+      content: '';
+      position: absolute; top: 0; left: 20%; right: 20%; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.5;
+    }
+
+    .days-number {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: clamp(88px, 26vw, 120px);
+      letter-spacing: -4px;
+      line-height: 0.9;
+      color: var(--text);
+      display: block;
+    }
+
+    .days-label {
+      font-family: var(--font-sans);
+      font-size: 11px; font-weight: 400;
+      letter-spacing: 4px; text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 14px;
+      display: block;
+    }
+
+    /* TIME ROW */
+    .time-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+    .time-card {
+      background: var(--s1); border: 1px solid var(--border);
+      border-radius: 16px; padding: 16px 8px;
+      text-align: center; display: flex; flex-direction: column; gap: 4px;
+    }
+
+    .time-val {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 26px; font-weight: 400;
+      color: var(--text2); line-height: 1;
+    }
+
+    .time-unit {
+      font-size: 9px; font-weight: 500;
+      color: var(--muted); letter-spacing: 2px; text-transform: uppercase;
+    }
+
+    /* GELD */
+    .money-block {
+      background: var(--s1); border: 1px solid var(--border);
+      border-radius: 22px; padding: 28px 24px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+
+    .money-block::before {
+      content: '';
+      position: absolute; top: 0; left: 25%; right: 25%; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      opacity: 0.6;
+    }
+
+    .money-label {
+      font-size: 10px; font-weight: 500;
+      color: var(--muted); letter-spacing: 3px; text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .money-amount {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: clamp(40px, 12vw, 54px);
+      font-weight: 400; letter-spacing: -1px;
+      color: var(--gold); line-height: 1;
+    }
+
+    /* MIJLPALEN */
+    .milestones-block {
+      background: var(--s1); border: 1px solid var(--border);
+      border-radius: 22px; padding: 22px 20px;
+    }
+
+    .block-title {
+      font-size: 10px; font-weight: 500;
+      color: var(--muted); letter-spacing: 3px; text-transform: uppercase;
+      margin-bottom: 16px; text-align: center;
+    }
+
+    .milestone-list { display: flex; flex-direction: column; gap: 6px; }
+
+    .milestone-item { border-radius: 12px; border: 1px solid var(--border); overflow: hidden; transition: border-color 0.2s; }
+    .milestone-item.done { background: #0a1a12; border-color: #1a3d22; }
+    .milestone-item.next { border-color: #3d2f6e; background: #0e0a1a; }
+    .milestone-item:not(.done):not(.next):hover { border-color: #2a3050; }
+
+    .milestone-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 14px; cursor: pointer; user-select: none;
+    }
+
+    .milestone-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .milestone-item.done .milestone-dot { background: var(--accent2); box-shadow: 0 0 8px var(--accent2); }
+    .milestone-item.next .milestone-dot { background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: pulse 2s ease infinite; }
+    .milestone-item:not(.done):not(.next) .milestone-dot { background: var(--border); }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+    .milestone-days {
+      font-size: 12px; font-weight: 400; flex: 1;
+      color: var(--text2);
+    }
+    .milestone-item:not(.done):not(.next) .milestone-days { color: var(--muted); }
+
+    .milestone-badge {
+      font-size: 10px; font-weight: 500;
+      padding: 2px 8px; border-radius: 20px; flex-shrink: 0;
+    }
+    .milestone-item.done .milestone-badge { background: #0d2a1a; color: var(--accent2); }
+    .milestone-item.next .milestone-badge { background: #1a1030; color: var(--accent); }
+
+    .milestone-chevron {
+      font-size: 9px; color: var(--muted); flex-shrink: 0;
+      transition: transform 0.25s; opacity: 0.6;
+    }
+    .milestone-item.open .milestone-chevron { transform: rotate(180deg); }
+
+    .milestone-fact-wrap { display: none; padding: 0 14px 12px 32px; }
+    .milestone-item.open .milestone-fact-wrap { display: block; }
+    .milestone-fact {
+      font-size: 12px; line-height: 1.7; font-weight: 300;
+      color: var(--muted);
+    }
+    .milestone-item.done .milestone-fact { color: #5a9a6a; }
+    .milestone-item.next .milestone-fact { color: #8a72cc; }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 32px; left: 50%;
+      transform: translateX(-50%) translateY(90px);
+      background: var(--s2); border: 1px solid var(--border);
+      border-radius: 100px; padding: 11px 22px;
+      font-size: 13px; color: var(--text); z-index: 999;
+      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      white-space: nowrap; pointer-events: none;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+<div class="glow-a"></div>
+<div class="glow-b"></div>
+
+<div class="app">
+  <div class="header">
+    <div class="header-eyebrow">Persoonlijk</div>
+    <div class="header-title">Nuchter<em>.</em></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('vandaag')">Vandaag</button>
+    <button class="tab" onclick="switchTab('mijlpalen')">Mijlpalen</button>
+  </div>
+
+  <div class="page active" id="page-vandaag">
+    <div class="counter-block">
+      <span class="days-number" id="daysNumber">0</span>
+      <span class="days-label">dagen nuchter</span>
+    </div>
+
+    <div class="time-row">
+      <div class="time-card">
+        <div class="time-val" id="hoursVal">0</div>
+        <div class="time-unit">Uren</div>
+      </div>
+      <div class="time-card">
+        <div class="time-val" id="weeksVal">0</div>
+        <div class="time-unit">Weken</div>
+      </div>
+      <div class="time-card">
+        <div class="time-val" id="monthsVal">0</div>
+        <div class="time-unit">Maanden</div>
+      </div>
+    </div>
+
+    <div class="money-block">
+      <div class="money-label">Geld bespaard</div>
+      <div class="money-amount" id="moneyAmount">€ 0,00</div>
+    </div>
+  </div>
+
+  <div class="page" id="page-mijlpalen">
+    <div class="milestones-block">
+      <div class="block-title">Mijlpalen</div>
+      <div class="milestone-list" id="milestoneList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const START = new Date(2026, 4, 7, 0, 0, 0);
+  const RATE = 43.35;
+
+  const MILESTONES = [
+    { days: 1,   fact: 'Je lichaam begint al na 6 uur alcohol af te breken. Na 24 uur is je bloedsuiker stabieler.' },
+    { days: 3,   fact: 'Slaapkwaliteit verbetert merkbaar. Angst en rusteloosheid nemen af naarmate je zenuwstelsel kalmeert.' },
+    { days: 7,   fact: 'Je lever heeft al significant minder vet. Bloeddruk daalt gemiddeld met 5 punten na één week.' },
+    { days: 14,  fact: 'Hydratatie van huid verbetert zichtbaar. Concentratie en geheugen zijn scherper dan een week geleden.' },
+    { days: 21,  fact: 'Vetverbranding is efficiënter. Hersenen produceren meer dopamine op een gezonde, natuurlijke manier.' },
+    { days: 30,  fact: 'Levervet neemt af met gemiddeld 15%. Immuunsysteem is merkbaar sterker. Slaap is dieper en herstelbevorderend.' },
+    { days: 50,  fact: 'Risico op hartritmestoornissen neemt significant af. Energieniveau is structureel hoger dan voor de stop.' },
+    { days: 60,  fact: 'Bloedwaarden zoals triglyceriden en glucose zijn meetbaar verbeterd. Huid ziet er jonger uit.' },
+    { days: 75,  fact: 'Zenuwstelsel is grotendeels hersteld. Emotionele stabiliteit is aantoonbaar beter dan bij de start.' },
+    { days: 100, fact: 'Lever is voor 90% hersteld bij matig gebruik. Kans op leverziekte daalt drastisch na 100 dagen.' },
+    { days: 180, fact: 'Risico op mond-, keel- en slokdarmkanker is al meetbaar lager. Bloeddruk is structureel gedaald.' },
+    { days: 365, fact: 'Risico op hartziekte is gehalveerd. Lever functioneert als die van een niet-drinker.' },
+  ];
+
+  function getDays() { return Math.floor((new Date() - START) / 86400000); }
+  function getHours() { return Math.floor((new Date() - START) / 3600000); }
+
+  function toggleMilestone(el) {
+    el.closest('.milestone-item').classList.toggle('open');
+  }
+
+  function render() {
+    const days = getDays();
+    const hours = getHours();
+    const weeks = Math.floor(days / 7);
+    const months = Math.floor(days / 30);
+
+    document.getElementById('daysNumber').textContent = days;
+    document.getElementById('hoursVal').textContent = hours.toLocaleString('nl-NL');
+    document.getElementById('weeksVal').textContent = weeks;
+    document.getElementById('monthsVal').textContent = months;
+
+    const saved = (days / 7) * RATE;
+    document.getElementById('moneyAmount').textContent = '€ ' + saved.toFixed(2).replace('.', ',');
+
+    const nextMilestone = MILESTONES.find(m => m.days > days);
+
+    document.getElementById('milestoneList').innerHTML = MILESTONES.map(m => {
+      const done = days >= m.days;
+      const isNext = nextMilestone && m.days === nextMilestone.days;
+      const rem = m.days - days;
+      let badge = '';
+      if (done) badge = '<span class="milestone-badge">✓ behaald</span>';
+      else if (isNext) badge = '<span class="milestone-badge">nog ' + rem + 'd</span>';
+
+      return '<div class="milestone-item ' + (done ? 'done' : isNext ? 'next' : '') + '">' +
+        '<div class="milestone-header" onclick="toggleMilestone(this)">' +
+          '<div class="milestone-dot"></div>' +
+          '<div class="milestone-days">' + m.days + ' dagen</div>' +
+          badge +
+          '<div class="milestone-chevron">▼</div>' +
+        '</div>' +
+        '<div class="milestone-fact-wrap"><div class="milestone-fact">' + m.fact + '</div></div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach((el, i) => {
+      el.classList.toggle('active', ['vandaag','mijlpalen'][i] === tab);
+    });
+    document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+    document.getElementById('page-' + tab).classList.add('active');
+  }
+
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+
+  render();
+  setInterval(render, 60000);
+
+  let toastT;
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => el.classList.remove('show'), 2400);
+  }
+</script>
+</body>
+</html>
