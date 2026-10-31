@@ -12,7 +12,7 @@
   <title>Nuchter</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -31,7 +31,7 @@
       --muted: #828a9e;
       --ease: cubic-bezier(0.22, 1, 0.36, 1);
       --font-serif: 'Instrument Serif', Georgia, serif;
-      --font-sans: 'Outfit', system-ui, sans-serif;
+      --font-sans: 'Instrument Sans', system-ui, sans-serif;
     }
 
     html { height: 100%; }
@@ -90,7 +90,7 @@
       flex: 1; padding: 10px 8px;
       border: none; border-radius: 8px;
       font-family: var(--font-sans);
-      font-size: 14px; font-weight: 500; line-height: 20px;
+      font-size: 14px; font-weight: 400; line-height: 20px;
       cursor: pointer;
       transition: background-color 150ms var(--ease), color 150ms var(--ease);
       background: none; color: var(--muted);
@@ -147,8 +147,9 @@
     }
 
     .time-val {
-      font-size: 24px; font-weight: 500; line-height: 1;
-      font-variant-numeric: tabular-nums;
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 28px; font-weight: 400; line-height: 1;
       color: var(--text);
     }
 
@@ -178,8 +179,10 @@
     }
 
     .money-amount {
-      font-size: 32px; font-weight: 500; line-height: 1;
-      font-variant-numeric: tabular-nums;
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 48px; font-weight: 400; line-height: 1;
+      letter-spacing: -0.02em;
       color: var(--gold);
     }
 
@@ -227,7 +230,7 @@
     .milestone-status {
       flex-shrink: 0;
       padding: 2px 8px; border-radius: 10px;
-      font-size: 12px; font-weight: 500; line-height: 16px;
+      font-size: 12px; font-weight: 400; line-height: 16px;
       font-variant-numeric: tabular-nums;
     }
     .milestone-item.done .milestone-status { background: #0d2a1a; color: var(--accent2); }
@@ -245,7 +248,7 @@
     .milestone-facts { display: flex; flex-direction: column; gap: 12px; }
     .milestone-line { display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: start; }
     .milestone-category {
-      font-size: 13px; font-weight: 500; line-height: 20px;
+      font-size: 13px; font-weight: 400; line-height: 20px;
     }
     .milestone-category.body { color: var(--accent2); }
     .milestone-category.mind { color: var(--accent); }
